@@ -1,6 +1,6 @@
 package com.frizzer.swing.starter;
 
-import com.frizzer.swing.controller.TaskController;
+import com.frizzer.swing.controller.TodoController;
 import com.frizzer.swing.registry.UUIDProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -12,10 +12,10 @@ import java.awt.*;
 @Component
 @Slf4j
 class SwingStarter implements ApplicationRunner {
-    private final TaskController controller;
+    private final TodoController controller;
     private final UUIDProvider idProvider;
 
-    public SwingStarter(TaskController controller, UUIDProvider idProvider) {
+    public SwingStarter(TodoController controller, UUIDProvider idProvider) {
         this.controller = controller;
         this.idProvider = idProvider;
     }

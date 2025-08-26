@@ -1,26 +1,26 @@
 package com.frizzer.swing.controller;
 
 import com.frizzer.swing.entity.Priority;
-import com.frizzer.swing.entity.Task;
+import com.frizzer.swing.entity.Todo;
 import com.frizzer.swing.event.sender.EventSender;
 import com.frizzer.swing.listener.ChangePriorityListener;
-import com.frizzer.swing.listener.DeleteItemListener;
-import com.frizzer.swing.model.TaskModel;
+import com.frizzer.swing.model.TodoModel;
 import com.frizzer.swing.registry.ListRegistry;
 import com.frizzer.swing.registry.TableRegistry;
 import com.frizzer.swing.repository.PriorityRepository;
-import com.frizzer.swing.repository.TaskRepository;
+import com.frizzer.swing.repository.TodoRepository;
 import com.frizzer.swing.task.BaseTask;
 import com.frizzer.swing.task.priority.CreatePriorityTask;
 import com.frizzer.swing.task.priority.LoadPriorityTask;
-import com.frizzer.swing.task.task.LoadTask;
+import com.frizzer.swing.task.task.LoadTodoTask;
 import com.frizzer.swing.view.MainView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.frizzer.swing.registry.RegistryNames.PRIORITY_LIST;
@@ -28,22 +28,22 @@ import static com.frizzer.swing.registry.RegistryNames.TASK_MAP;
 
 @Component
 @Slf4j
-public class TaskController {
+public class TodoController {
 
-    private final TaskModel model;
+    private final TodoModel model;
     private final DefaultListModel<Priority> priorities;
     private final MainView view;
     private final EventSender eventSender;
-    private final TaskRepository taskRepository;
+    private final TodoRepository todoRepository;
     private final PriorityRepository priorityRepository;
     private final TableRegistry taskRegistry;
     private final ListRegistry<Priority> priorityRegistry;
 
-    public TaskController(TaskModel model,
+    public TodoController(TodoModel model,
                           DefaultListModel<Priority> priorities,
                           MainView view,
                           EventSender eventSender,
-                          TaskRepository taskRepository,
+                          TodoRepository todoRepository,
                           TableRegistry taskRegistry,
                           ListRegistry<Priority> priorityRegistry,
                           PriorityRepository priorityRepository) {
@@ -51,7 +51,7 @@ public class TaskController {
         this.priorities = priorities;
         this.view = view;
         this.eventSender = eventSender;
-        this.taskRepository = taskRepository;
+        this.todoRepository = todoRepository;
         this.priorityRepository = priorityRepository;
         this.taskRegistry = taskRegistry;
         this.priorityRegistry = priorityRegistry;
@@ -70,12 +70,12 @@ public class TaskController {
     }
 
     private void loadTask() {
-        BaseTask<List<Task>, Object[]> task = new LoadTask(taskRepository, model::setTasks);
+        BaseTask<List<Todo>, Object[]> task = new LoadTodoTask(todoRepository, model::setTasks);
         task.execute();
         task.addPropertyChangeListener(change -> {
             if (change.getNewValue() == SwingWorker.StateValue.DONE) {
-                view.updateTable(model);
                 taskRegistry.register(TASK_MAP, model.getModel());
+                view.updateTable(new TodoModel((DefaultTableModel) taskRegistry.get(TASK_MAP)));
             }
         });
     }
@@ -85,8 +85,10 @@ public class TaskController {
         task.execute();
         task.addPropertyChangeListener(change -> {
             if (change.getNewValue() == SwingWorker.StateValue.DONE) {
-                view.addPriorities(Collections.list(priorities.elements()));
                 priorityRegistry.register(PRIORITY_LIST, priorities);
+                view.addPriorities(Arrays.stream(((DefaultListModel<Priority>) priorityRegistry.get(PRIORITY_LIST)).toArray())
+                                         .map(Priority.class::cast)
+                                         .toArray(Priority[]::new));
             }
         });
 
@@ -105,8 +107,6 @@ public class TaskController {
         view.getPriorityForm()
             .getPriorityModel()
             .addListDataListener(new ChangePriorityListener(view.getPriorityForm()));
-
-        view.getMainTable().addMouseListener(new DeleteItemListener(taskRepository, model, eventSender));
     }
 
     private void addPriorityLogic(ActionEvent e) {

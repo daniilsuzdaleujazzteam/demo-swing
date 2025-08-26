@@ -1,13 +1,14 @@
 package com.frizzer.swing.view;
 
 import com.frizzer.swing.entity.Priority;
-import com.frizzer.swing.model.TaskModel;
+import com.frizzer.swing.model.TodoModel;
 import com.frizzer.swing.view.form.PriorityForm;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -18,11 +19,11 @@ public class MainView extends JFrame {
     private JPanel mainPanel;
     private JButton addTask;
     private JButton priorityList;
-    private final TaskModel model;
+    private final TodoModel model;
     private JTable mainTable;
     private final PriorityForm priorityForm;
 
-    public MainView(TaskModel model, PriorityForm priorityForm) {
+    public MainView(TodoModel model, PriorityForm priorityForm) {
         this.model = model;
         this.priorityForm = priorityForm;
 
@@ -35,12 +36,12 @@ public class MainView extends JFrame {
 
     }
 
-    public void updateTable(TaskModel model) {
+    public void updateTable(TodoModel model) {
         model.getModel().setDataVector(model.getModel().getDataVector(), new Vector<>(List.of(model.getColumns())));
     }
 
-    public void addPriorities(List<Priority> priorities) {
-        priorityForm.addToPriorityList(priorities.stream().map(Priority::getName).toList());
+    public void addPriorities(Priority[] priorities) {
+        priorityForm.addToPriorityList(Arrays.stream(priorities).toList());
     }
 
     private void initComponents() {

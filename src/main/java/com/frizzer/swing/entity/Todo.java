@@ -17,10 +17,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Task {
+public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    String title;
     String description;
     LocalDate date;
     @ManyToOne
@@ -28,7 +29,7 @@ public class Task {
     Priority priority;
 
     public String[] toRow() {
-        return new String[]{String.valueOf(this.id), this.description, this.date.toString(), this.priority.getName()};
+        return new String[]{this.title, this.description, this.date.toString(), this.priority.getName()};
     }
 
 }

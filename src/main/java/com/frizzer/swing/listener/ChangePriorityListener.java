@@ -13,16 +13,16 @@ public class ChangePriorityListener implements ListDataListener {
 
     @Override
     public void intervalAdded(ListDataEvent e) {
-        form.updatePriorityList();
+        form.refreshPrioritiesList();
     }
 
     @Override
     public void intervalRemoved(ListDataEvent e) {
-        form.updatePriorityList();
+        form.refreshPrioritiesList();
     }
 
     @Override
     public void contentsChanged(ListDataEvent e) {
-        form.updatePriorityList();
+        form.refreshPrioritiesList();
     }
 }

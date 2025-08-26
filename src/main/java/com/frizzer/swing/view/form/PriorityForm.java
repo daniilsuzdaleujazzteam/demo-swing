@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -16,7 +15,7 @@ public class PriorityForm extends JFrame {
 
     private final AddPriorityForm addPriorityForm;
     private JPanel mainPanel;
-    private JList<String> priorityList;
+    private JList<Priority> priorityList;
     private JButton addPriorityButton;
     private final DefaultListModel<Priority> priorityModel;
     private final ListRegistry<Priority> priorityRegistry;
@@ -40,15 +39,11 @@ public class PriorityForm extends JFrame {
         mainPanel = new JPanel();
         mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 10, 25, 10));
         mainPanel.add(addPriorityButton());
-        mainPanel.add(updatePriorityList());
+        mainPanel.add(refreshPrioritiesList());
     }
 
-    public JScrollPane updatePriorityList() {
-
-        List<String> names = Collections.list(priorityModel.elements()).stream().map(Priority::getName).toList();
-        DefaultListModel<String> model = new DefaultListModel<>();
-        model.addAll(names);
-        priorityList = new JList<>(model);
+    public JScrollPane refreshPrioritiesList() {
+        priorityList = new JList<>(priorityModel);
 
         JScrollPane scrollPane = new JScrollPane(priorityList);
         scrollPane.setPreferredSize(new Dimension(200, 300));
@@ -56,8 +51,11 @@ public class PriorityForm extends JFrame {
         return scrollPane;
     }
 
-    public void addToPriorityList(List<String> names) {
-        SwingUtilities.invokeLater(() -> ((DefaultListModel<String>) priorityList.getModel()).addAll(names));
+    public void addToPriorityList(List<Priority> priorities) {
+        SwingUtilities.invokeLater(() -> {
+            ((DefaultListModel<Priority>) priorityList.getModel()).addAll(priorities);
+            refreshPrioritiesList();
+        });
     }
 
     private JButton addPriorityButton() {

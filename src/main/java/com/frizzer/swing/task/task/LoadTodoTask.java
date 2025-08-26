@@ -1,8 +1,8 @@
 package com.frizzer.swing.task.task;
 
-import com.frizzer.swing.entity.Task;
+import com.frizzer.swing.entity.Todo;
 import com.frizzer.swing.event.DataChangeType;
-import com.frizzer.swing.repository.TaskRepository;
+import com.frizzer.swing.repository.TodoRepository;
 import com.frizzer.swing.task.TableTask;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -13,10 +13,10 @@ import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 @Slf4j
-public class LoadTask extends TableTask<List<Task>, Object[]> {
+public class LoadTodoTask extends TableTask<List<Todo>, Object[]> {
 
-    private final TaskRepository taskRepository;
-    private final Consumer<List<Task>> taskConsumer;
+    private final TodoRepository todoRepository;
+    private final Consumer<List<Todo>> taskConsumer;
 
     @Override
     public DataChangeType getType() {
@@ -24,9 +24,9 @@ public class LoadTask extends TableTask<List<Task>, Object[]> {
     }
 
     @Override
-    protected List<Task> doInBackground() {
+    protected List<Todo> doInBackground() {
         log.info("Started loading tasks");
-        return taskRepository.findAll();
+        return todoRepository.findAll();
     }
 
     @SneakyThrows

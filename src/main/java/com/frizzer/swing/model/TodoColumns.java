@@ -5,13 +5,12 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum TaskTableColumns {
+public enum TodoColumns {
 
-    ID("Id", 0),
+    ID("Title", 0),
     DESCRIPTION("Description", 1),
     DATE("Date", 2),
-    PRIORITY("Priority", 3),
-    DELETE("Delete", 4);
+    PRIORITY("Priority", 3);
 
     private final String name;
     private final int order;

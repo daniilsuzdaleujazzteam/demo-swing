@@ -1,8 +1,8 @@
 package com.frizzer.swing.task.task;
 
-import com.frizzer.swing.entity.Task;
+import com.frizzer.swing.entity.Todo;
 import com.frizzer.swing.event.DataChangeType;
-import com.frizzer.swing.repository.TaskRepository;
+import com.frizzer.swing.repository.TodoRepository;
 import com.frizzer.swing.task.TableTask;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +14,10 @@ import javax.swing.table.DefaultTableModel;
 @Slf4j
 @Getter
 @RequiredArgsConstructor
-public class CreateTask extends TableTask<Task, Object[]> {
+public class CreateTodoTask extends TableTask<Todo, Object[]> {
 
-    private final TaskRepository taskRepository;
-    private final Task task;
+    private final TodoRepository todoRepository;
+    private final Todo todo;
     private final DefaultTableModel tableModel;
 
     @Override
@@ -26,9 +26,9 @@ public class CreateTask extends TableTask<Task, Object[]> {
     }
 
     @Override
-    protected Task doInBackground() {
-        log.info("Started saving task with description {}", task.getDescription());
-        Task saved = taskRepository.save(task);
+    protected Todo doInBackground() {
+        log.info("Started saving task with description {}", todo.getDescription());
+        Todo saved = todoRepository.save(todo);
         firstId = saved.getId();
         lastId = saved.getId();
         return saved;
@@ -37,8 +37,8 @@ public class CreateTask extends TableTask<Task, Object[]> {
     @SneakyThrows
     @Override
     protected void done() {
-        Task saved = get();
+        Todo saved = get();
         tableModel.addRow(saved.toRow());
-        log.info("Finished saving task with description {}", task.getDescription());
+        log.info("Finished saving task with description {}", todo.getDescription());
     }
 }

@@ -18,5 +18,11 @@ public class Priority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    private long weight;
     private String name;
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

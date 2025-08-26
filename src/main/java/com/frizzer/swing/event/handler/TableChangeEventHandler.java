@@ -4,8 +4,8 @@ import com.frizzer.swing.event.Event;
 import com.frizzer.swing.event.TableChangeEvent;
 import com.frizzer.swing.registry.TableRegistry;
 import com.frizzer.swing.registry.UUIDProvider;
-import com.frizzer.swing.repository.TaskRepository;
-import com.frizzer.swing.task.task.LoadByIdTask;
+import com.frizzer.swing.repository.TodoRepository;
+import com.frizzer.swing.task.task.LoadTodoByIdTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import java.util.Objects;
 public class TableChangeEventHandler implements EventHandler<TableChangeEvent> {
 
     private final UUIDProvider idProvider;
-    private final TaskRepository taskRepository;
+    private final TodoRepository todoRepository;
     private final TableRegistry registry;
 
     @Override
@@ -35,7 +35,7 @@ public class TableChangeEventHandler implements EventHandler<TableChangeEvent> {
             return;
         }
 
-        new LoadByIdTask(taskRepository, event.firstId(), event.lastId(), tasks -> {
+        new LoadTodoByIdTask(todoRepository, event.firstId(), event.lastId(), tasks -> {
             DefaultTableModel model = (DefaultTableModel) registry.get(event.tableId());
             switch (event.type()) {
                 case INSERT -> tasks.forEach(task -> model.addRow(task.toRow()));
