@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  activemq:
+    image: apache/activemq-classic:latest
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - activemq_data:/opt/activemq/data
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=admin
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    restart: unless-stopped
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong@Pass1"
+      MSSQL_PID: "Developer"
+    volumes:
+      - mssql_data:/var/opt/mssql
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: unless-stopped
+    user: root
+    ports:
+      - "8080:8080"   # Web UI
+      - "50000:50000" # For agents
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock # (optional) to allow Jenkins to run docker builds
+
+volumes:
+  jenkins_home:
+  activemq_data:
+  mssql_data:

@@ -1,0 +1,8 @@
+package com.frizzer.swing.repository;
+
+import com.frizzer.swing.entity.Priority;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PriorityRepository extends JpaRepository<Priority, Long> {}
