@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/daniilsuzdaleujazzteam/demo-swing'
+                git branch: 'feature', url: 'https://github.com/daniilsuzdaleujazzteam/demo-swing'
             }
         }
 
