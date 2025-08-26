@@ -1,7 +1,7 @@
 package com.frizzer.swing.config;
 
-import com.frizzer.swing.entity.Priority;
-import com.frizzer.swing.model.TodoModel;
+import com.frizzer.swing.domain.Priority;
+import com.frizzer.swing.gui.model.TodoModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
