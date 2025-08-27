@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TodoColumns {
 
-    ID("Title", 0),
+    TITLE("Title", 0),
     DESCRIPTION("Description", 1),
     DATE("Date", 2),
     PRIORITY("Priority", 3);

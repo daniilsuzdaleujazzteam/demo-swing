@@ -1,22 +1,26 @@
-package com.frizzer.swing.logic.task.task;
+package com.frizzer.swing.logic.task.todo;
 
 import com.frizzer.swing.domain.Todo;
 import com.frizzer.swing.logic.event.DataChangeType;
 import com.frizzer.swing.logic.repository.TodoRepository;
 import com.frizzer.swing.logic.task.TableTask;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-@RequiredArgsConstructor
 @Slf4j
-public class LoadTodoTask extends TableTask<List<Todo>, Object[]> {
-
+public class LoadTodoByIdTask extends TableTask<List<Todo>, Object[]> {
     private final TodoRepository todoRepository;
     private final Consumer<List<Todo>> taskConsumer;
+
+
+    public LoadTodoByIdTask(TodoRepository todoRepository, List<Long> ids, Consumer<List<Todo>> taskConsumer) {
+        this.todoRepository = todoRepository;
+        this.taskConsumer = taskConsumer;
+        idList.addAll(ids);
+    }
 
     @Override
     public DataChangeType getType() {
@@ -25,14 +29,12 @@ public class LoadTodoTask extends TableTask<List<Todo>, Object[]> {
 
     @Override
     protected List<Todo> doInBackground() {
-        log.info("Started loading tasks");
-        return todoRepository.findAll();
+        return todoRepository.findAllByIdIn(idList);
     }
 
     @SneakyThrows
     @Override
     protected void done() {
         taskConsumer.accept(get());
-        log.info("Finished loading tasks");
     }
 }

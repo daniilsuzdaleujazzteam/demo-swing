@@ -1,4 +1,4 @@
-package com.frizzer.swing.logic.task.task;
+package com.frizzer.swing.logic.task.todo;
 
 import com.frizzer.swing.logic.event.DataChangeType;
 import com.frizzer.swing.logic.repository.TodoRepository;
@@ -26,7 +26,7 @@ public class DeleteTodoTask extends TableTask<Void, Object[]> {
     protected Void doInBackground() {
         log.info("Started deleting task with id {}", taskId);
         todoRepository.deleteById(taskId);
-        firstId = taskId;
+        idList.add(taskId);
         return null;
     }
 

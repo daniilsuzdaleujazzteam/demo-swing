@@ -15,8 +15,10 @@ public class TodoModel implements Serializable {
                                            .map(TodoColumns::getName)
                                            .toArray(String[]::new);
     private final DefaultTableModel model;
+    private final String name;
 
-    public TodoModel(DefaultTableModel model) {
+    public TodoModel(DefaultTableModel model, String name) {
+        this.name = name;
         model.setColumnIdentifiers(columns);
         this.model = model;
     }

@@ -1,17 +1,18 @@
 package com.frizzer.swing.logic.event.handler;
 
+import com.frizzer.swing.config.registry.UUIDProvider;
+import com.frizzer.swing.gui.model.TodoModel;
 import com.frizzer.swing.logic.event.Event;
 import com.frizzer.swing.logic.event.TableChangeEvent;
-import com.frizzer.swing.config.registry.TableRegistry;
-import com.frizzer.swing.config.registry.UUIDProvider;
 import com.frizzer.swing.logic.repository.TodoRepository;
-import com.frizzer.swing.logic.task.task.LoadTodoByIdTask;
+import com.frizzer.swing.logic.task.todo.LoadTodoByIdTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -21,7 +22,12 @@ public class TableChangeEventHandler implements EventHandler<TableChangeEvent> {
 
     private final UUIDProvider idProvider;
     private final TodoRepository todoRepository;
-    private final TableRegistry registry;
+    private final List<TodoModel> todoModels;
+
+    @Override
+    public Class<TableChangeEvent> getEventClass() {
+        return TableChangeEvent.class;
+    }
 
     @Override
     public void handle(Event e) {
@@ -35,27 +41,30 @@ public class TableChangeEventHandler implements EventHandler<TableChangeEvent> {
             return;
         }
 
-        new LoadTodoByIdTask(todoRepository, event.firstId(), event.lastId(), tasks -> {
-            DefaultTableModel model = (DefaultTableModel) registry.get(event.tableId());
+        new LoadTodoByIdTask(todoRepository, event.affectedId(), tasks -> {
+            DefaultTableModel model = todoModels.stream()
+                                                .filter(it -> it.getName().equals(event.tableId()))
+                                                .findFirst()
+                                                .orElseThrow(() -> new IllegalStateException("Unknow table id " + event.tableId()))
+                                                .getModel();
             switch (event.type()) {
                 case INSERT -> tasks.forEach(task -> model.addRow(task.toRow()));
-                case DELETE -> SwingUtilities.invokeLater(() -> {
-                    var vector = model.getDataVector();
-                    var toRemove = vector.stream()
-                                         .filter(it -> Long.parseLong(it.getFirst().toString()) == event.firstId())
-                                         .findFirst()
-                                         .orElseThrow();
-                    vector.removeElement(toRemove);
-                    model.fireTableDataChanged();
-                });
+                case DELETE -> handleDelete(model, event);
                 case UPDATE -> {}//TODO
                 case LOAD -> {}//TODO
             }
         }).execute();
     }
 
-    @Override
-    public Class<TableChangeEvent> getEventClass() {
-        return TableChangeEvent.class;
+    private void handleDelete(DefaultTableModel model, TableChangeEvent event) {
+        SwingUtilities.invokeLater(() -> {
+            var vector = model.getDataVector();
+            var index = vector.stream()
+                              .filter(it -> Long.parseLong(it.getFirst().toString()) == event.affectedId().getFirst())
+                              .findFirst()
+                              .orElseThrow();
+            vector.removeElement(index);
+        });
     }
+
 }

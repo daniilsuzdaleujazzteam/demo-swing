@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
-    List<Todo> findAllByIdBetween(Long firstId, Long lastId);
+    List<Todo> findAllByIdIn(List<Long> ids);
 }

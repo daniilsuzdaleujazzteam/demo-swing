@@ -1,4 +1,4 @@
-package com.frizzer.swing.logic.task.task;
+package com.frizzer.swing.logic.task.todo;
 
 import com.frizzer.swing.domain.Todo;
 import com.frizzer.swing.logic.event.DataChangeType;
@@ -29,8 +29,7 @@ public class CreateTodoTask extends TableTask<Todo, Object[]> {
     protected Todo doInBackground() {
         log.info("Started saving task with description {}", todo.getDescription());
         Todo saved = todoRepository.save(todo);
-        firstId = saved.getId();
-        lastId = saved.getId();
+        idList.add(saved.getId());
         return saved;
     }
 
