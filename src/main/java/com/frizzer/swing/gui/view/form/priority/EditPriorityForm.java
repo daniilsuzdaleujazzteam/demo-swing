@@ -1,5 +1,6 @@
-package com.frizzer.swing.gui.view.form;
+package com.frizzer.swing.gui.view.form.priority;
 
+import com.frizzer.swing.domain.Priority;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -7,20 +8,27 @@ import javax.swing.*;
 
 @Getter
 @Component
-public class AddPriorityForm extends JFrame {
+public class EditPriorityForm extends JFrame {
 
     private JTextField nameField;
     private JTextField weightField;
     private JButton submitButton;
     private JPanel mainPanel;
+    private Priority selectedPriority;
 
-    public AddPriorityForm() {
-        setTitle("Add priority");
+    public EditPriorityForm() {
+        setTitle("Edit priority");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         initComponents();
         add(mainPanel);
         pack();
+    }
+
+    public void setSelectedPriority(Priority selectedPriority) {
+        this.selectedPriority = selectedPriority;
+        nameField.setText(selectedPriority.getName());
+        weightField.setText(String.valueOf(selectedPriority.getWeight()));
     }
 
     private void initComponents() {
