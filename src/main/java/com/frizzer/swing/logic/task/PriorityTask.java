@@ -9,6 +9,6 @@ public abstract class PriorityTask<T, V> extends BaseTask<T, V> {
 
     @Override
     public Event createEvent(String id) {
-        return new PriorityListChangeEvent(id, PRIORITY_LIST, getType(), firstId, lastId);
+        return new PriorityListChangeEvent(id, PRIORITY_LIST, getType(), idList);
     }
 }

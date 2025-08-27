@@ -1,7 +1,9 @@
 package com.frizzer.swing.gui.view;
 
 import com.frizzer.swing.gui.model.TodoModel;
-import com.frizzer.swing.gui.view.form.PriorityForm;
+import com.frizzer.swing.gui.view.form.todo.AddTodoForm;
+import com.frizzer.swing.gui.view.form.priority.PriorityForm;
+import com.frizzer.swing.gui.view.form.todo.EditTodoForm;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +24,14 @@ public class MainView extends JFrame {
     private final TodoModel model;
     private JTable mainTable;
     private final PriorityForm priorityForm;
+    private final AddTodoForm addTodoForm;
+    private final EditTodoForm editTodoForm;
 
-    public MainView(TodoModel model, PriorityForm priorityForm) {
+    public MainView(TodoModel model, PriorityForm priorityForm, AddTodoForm addTodoForm, EditTodoForm editTodoForm) {
         this.model = model;
         this.priorityForm = priorityForm;
+        this.addTodoForm = addTodoForm;
+        this.editTodoForm = editTodoForm;
 
         setName("Demo Swing App");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -85,13 +91,6 @@ public class MainView extends JFrame {
     private JButton moveDownButton() {
         moveDownTask = new JButton("↓");
         return moveDownTask;
-    }
-
-    public JFrame openAddTaskFrame() {
-        JFrame addFrame = new JFrame("New task");
-        addFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-
-        return addFrame;
     }
 
     private JScrollPane createTable() {

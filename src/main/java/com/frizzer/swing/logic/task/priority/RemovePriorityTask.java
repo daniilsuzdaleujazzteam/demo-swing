@@ -12,7 +12,7 @@ import javax.swing.*;
 
 @RequiredArgsConstructor
 @Slf4j
-public class CreatePriorityTask extends PriorityTask<Priority, Object[]> {
+public class RemovePriorityTask extends PriorityTask<Priority, Object[]> {
 
     private final PriorityRepository repository;
     private final Priority priority;
@@ -20,22 +20,22 @@ public class CreatePriorityTask extends PriorityTask<Priority, Object[]> {
 
     @Override
     protected Priority doInBackground(){
-        log.info("Started saving task with name {}", priority.getName());
-        Priority saved = repository.save(priority);
-        idList.add(saved.getId());
-        return saved;
+        log.info("Started deleting priority with name {}", priority.getName());
+        repository.removePriorityByName(priority.getName());
+        idList.add(priority.getId());
+        return priority;
     }
 
     @Override
     @SneakyThrows
     public void done(){
-        Priority saved = get();
-        listModel.addElement(saved);
-        log.info("Finished updating task with name {}", priority.getName());
+        Priority removed = get();
+        listModel.removeElement(removed);
+        log.info("Finished delete task with name {}", priority.getName());
     }
 
     @Override
     public DataChangeType getType() {
-        return DataChangeType.INSERT;
+        return DataChangeType.DELETE;
     }
 }

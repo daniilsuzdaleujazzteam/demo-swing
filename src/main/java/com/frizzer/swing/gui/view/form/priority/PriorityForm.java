@@ -1,7 +1,6 @@
-package com.frizzer.swing.gui.view.form;
+package com.frizzer.swing.gui.view.form.priority;
 
 import com.frizzer.swing.domain.Priority;
-import com.frizzer.swing.config.registry.ListRegistry;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -13,20 +12,20 @@ import java.awt.*;
 public class PriorityForm extends JFrame {
 
     private final AddPriorityForm addPriorityForm;
+    private final EditPriorityForm editPriorityForm;
     private JPanel mainPanel;
     private JList<Priority> priorityList;
     private JButton addPriorityButton;
     private JButton editPriorityButton;
     private JButton deletePriorityButton;
-    private final DefaultListModel<Priority> priorityModel;
-    private final ListRegistry<Priority> priorityRegistry;
+    private final ListModel<Priority> priorityModel;
 
     public PriorityForm(AddPriorityForm addPriorityForm,
-                        DefaultListModel<Priority> priorityModel,
-                        ListRegistry<Priority> priorityRegistry) {
+                        EditPriorityForm editPriorityForm,
+                        ListModel<Priority> priorityModel) {
         this.addPriorityForm = addPriorityForm;
+        this.editPriorityForm = editPriorityForm;
         this.priorityModel = priorityModel;
-        this.priorityRegistry = priorityRegistry;
 
         setTitle("Priority Form");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);

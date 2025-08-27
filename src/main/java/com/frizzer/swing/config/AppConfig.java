@@ -8,15 +8,19 @@ import org.springframework.context.annotation.Configuration;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import static com.frizzer.swing.config.registry.RegistryNames.TODO_MAP;
+
 @Configuration
 public class AppConfig {
 
     @Bean
-    public TodoModel taskModel() {
-        return new TodoModel(new DefaultTableModel());
+    public TodoModel todoModel() {
+        return new TodoModel(new DefaultTableModel(), TODO_MAP);
     }
 
     @Bean
-    public DefaultListModel<Priority> priorityModel() {return new DefaultListModel<>();}
+    public DefaultListModel<Priority> priorityModel() {
+        return new DefaultListModel<>();
+    }
 
 }
