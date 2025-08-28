@@ -7,12 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PriorityRepository extends JpaRepository<Priority, Long> {
-    Optional<Priority> findByName(String name);
-
     @Transactional
     void removePriorityByName(String name);
 
