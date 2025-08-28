@@ -23,16 +23,16 @@ import java.util.Objects;
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(nullable = false, unique = true)
-    String title;
+    private String title;
     @Column(nullable = false)
-    String description;
+    private String description;
     @Column(nullable = false)
-    LocalDate date;
+    private LocalDate date;
     @ManyToOne
     @JoinColumn(name = "priority_id", nullable = false)
-    Priority priority;
+    private Priority priority;
 
     @Override
     public final boolean equals(Object o) {
