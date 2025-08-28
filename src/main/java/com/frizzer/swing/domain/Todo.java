@@ -11,8 +11,10 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @AllArgsConstructor
@@ -32,8 +34,25 @@ public class Todo {
     @JoinColumn(name = "priority_id", nullable = false)
     Priority priority;
 
-    public String[] toRow() {
-        return new String[]{this.title, this.description, this.date.toString(), this.priority.getName()};
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {return true;}
+        if (o == null || this.getClass() != o.getClass()) {return false;}
+        Class<?> oEffectiveClass = o instanceof HibernateProxy proxy ?
+                proxy.getHibernateLazyInitializer().getPersistentClass() :
+                o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy proxy ?
+                proxy.getHibernateLazyInitializer().getPersistentClass() :
+                this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) {return false;}
+        Todo todo = (Todo) o;
+        return getId() != null && Objects.equals(getId(), todo.getId());
     }
 
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy proxy ?
+                proxy.getHibernateLazyInitializer().getPersistentClass().hashCode() :
+                getClass().hashCode();
+    }
 }

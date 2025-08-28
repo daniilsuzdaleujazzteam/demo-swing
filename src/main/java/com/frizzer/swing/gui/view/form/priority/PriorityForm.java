@@ -1,48 +1,109 @@
 package com.frizzer.swing.gui.view.form.priority;
 
 import com.frizzer.swing.domain.Priority;
+import com.frizzer.swing.gui.event.sender.EventSender;
+import com.frizzer.swing.gui.model.priority.PriorityModel;
+import com.frizzer.swing.gui.view.CrudComponent;
+import com.frizzer.swing.logic.repository.PriorityRepository;
+import com.frizzer.swing.logic.tasks.priority.RemovePriorityTask;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 @Getter
 @Component
-public class PriorityForm extends JFrame {
+@RequiredArgsConstructor
+public class PriorityForm extends CrudComponent {
 
-    private final AddPriorityForm addPriorityForm;
-    private final EditPriorityForm editPriorityForm;
-    private JPanel mainPanel;
+    private final UpsertPriorityForm upsertPriorityForm;
+    private final PriorityModel priorityModel;
+    private final PriorityRepository priorityRepository;
+    private final EventSender eventSender;
+
     private JList<Priority> priorityList;
-    private JButton addPriorityButton;
-    private JButton editPriorityButton;
-    private JButton deletePriorityButton;
-    private final ListModel<Priority> priorityModel;
 
-    public PriorityForm(AddPriorityForm addPriorityForm,
-                        EditPriorityForm editPriorityForm,
-                        ListModel<Priority> priorityModel) {
-        this.addPriorityForm = addPriorityForm;
-        this.editPriorityForm = editPriorityForm;
-        this.priorityModel = priorityModel;
-
+    @Override
+    protected void initComponents() {
         setTitle("Priority Form");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    }
 
-        initComponents();
+    @Override
+    protected void initButtons() {
+        super.initButtons();
+        createButton.addActionListener(e -> upsertPriorityForm.setVisible(true));
+        editButton.addActionListener(this::openUpsertForEditPriority);
+        deleteButton.addActionListener(this::deletePriority);
+    }
+
+    @Override
+    protected void placeComponents() {
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 10, 25, 10));
+        mainPanel.add(createPrioritiesList());
+
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.add(createButton);
+        buttonPanel.add(Box.createVerticalStrut(10));
+        buttonPanel.add(editButton);
+        buttonPanel.add(Box.createVerticalStrut(10));
+        buttonPanel.add(deleteButton);
+
+        mainPanel.add(buttonPanel, 0);
         add(mainPanel);
+
         pack();
     }
 
-    public void initComponents() {
-        mainPanel = new JPanel();
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 10, 25, 10));
-        mainPanel.add(buttonPanel());
-        mainPanel.add(prioritiesList());
+    @Override
+    protected JPanel createMainPanel() {
+        return new JPanel();
     }
 
-    public JScrollPane prioritiesList() {
+    @Override
+    protected JPanel createButtonPanel() {
+        return new JPanel();
+    }
+
+    @Override
+    protected JButton createCreateButton() {
+        JButton button = new JButton("Add");
+
+        Dimension buttonSize = new Dimension(150, 30);
+
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+
+        return button;
+    }
+
+    @Override
+    protected JButton createEditButton() {
+        JButton button = new JButton("Edit");
+
+        Dimension buttonSize = new Dimension(150, 30);
+
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+
+        return button;
+    }
+
+    @Override
+    protected JButton createDeleteButton() {
+        JButton button = new JButton("Delete");
+
+        Dimension buttonSize = new Dimension(150, 30);
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+
+        return button;
+    }
+
+    private JScrollPane createPrioritiesList() {
         priorityList = new JList<>(priorityModel);
         JScrollPane scrollPane = new JScrollPane(priorityList);
         scrollPane.setPreferredSize(new Dimension(200, 200));
@@ -50,49 +111,20 @@ public class PriorityForm extends JFrame {
         return scrollPane;
     }
 
-    private JPanel buttonPanel() {
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+    private void deletePriority(ActionEvent e) {
+        Priority priority = priorityList.getSelectedValue();
+        eventSender.executeAndSend(new RemovePriorityTask(priorityRepository,
+                priority,
+                priorities -> SwingUtilities.invokeLater(() -> priorityModel.remove(priorities))));
 
-        buttonPanel.add(addPriorityButton());
-        buttonPanel.add(Box.createVerticalStrut(10));
-        buttonPanel.add(editPriorityButton());
-        buttonPanel.add(Box.createVerticalStrut(10));
-        buttonPanel.add(deletePriorityButton());
-
-        return buttonPanel;
     }
 
-    private JButton addPriorityButton() {
-        addPriorityButton = new JButton("Add Priority");
-
-        Dimension buttonSize = new Dimension(150, 30);
-
-        addPriorityButton.setPreferredSize(buttonSize);
-        addPriorityButton.setMaximumSize(buttonSize);
-
-        return addPriorityButton;
-    }
-
-    private JButton editPriorityButton() {
-        editPriorityButton = new JButton("Edit Priority");
-
-        Dimension buttonSize = new Dimension(150, 30);
-
-        editPriorityButton.setPreferredSize(buttonSize);
-        editPriorityButton.setMaximumSize(buttonSize);
-
-        return editPriorityButton;
-    }
-
-    private JButton deletePriorityButton() {
-        deletePriorityButton = new JButton("Delete Priority");
-
-        Dimension buttonSize = new Dimension(150, 30);
-        deletePriorityButton.setPreferredSize(buttonSize);
-        deletePriorityButton.setMaximumSize(buttonSize);
-
-        return deletePriorityButton;
+    private void openUpsertForEditPriority(ActionEvent e) {
+        var selectedPriority = priorityList.getSelectedValue();
+        if (selectedPriority != null) {
+            upsertPriorityForm.setSelectedPriority(selectedPriority);
+            upsertPriorityForm.setVisible(true);
+        }
     }
 
 }
