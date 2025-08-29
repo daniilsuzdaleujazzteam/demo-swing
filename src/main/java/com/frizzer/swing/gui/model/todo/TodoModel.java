@@ -2,10 +2,7 @@ package com.frizzer.swing.gui.model.todo;
 
 import com.frizzer.swing.domain.Priority;
 import com.frizzer.swing.domain.Todo;
-import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
-import com.frizzer.swing.gui.event.event.impl.PlacementSwapEvent;
 import lombok.Getter;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -109,35 +106,14 @@ public class TodoModel extends AbstractTableModel {
     }
 
     public void swapRows(int index1, int index2) {
+        if (index1 < 0 || index2 < 0 || index1 >= data.size() || index2 >= data.size()) {
+            return;
+        }
         SwingUtilities.invokeLater(() -> {
             Collections.swap(data, index1, index2);
             fireTableRowsUpdated(index1, index1);
             fireTableRowsUpdated(index2, index2);
         });
-    }
-
-    @EventListener(EntityChangedEvent.class)
-    private void onTodoChanged(EntityChangedEvent<?> event) {
-        if (event.entityClass() == Priority.class) {
-            Priority priority = ((List<Priority>) event.entity()).getFirst();
-            switch (event.dataChangeType()) {
-                case UPSERT -> upsertPriority(priority);
-                case DELETE -> removeByPriority(priority);
-            }
-        }
-        if (event.entityClass() == Todo.class) {
-            List<Todo> todos = (List<Todo>) event.entity();
-            switch (event.dataChangeType()) {
-                case LOAD -> addAll(todos);
-                case UPSERT -> upsert(todos.getFirst());
-                case DELETE -> remove(todos.getFirst());
-            }
-        }
-    }
-
-    @EventListener(PlacementSwapEvent.class)
-    private void onPlacementSwap(PlacementSwapEvent event) {
-        swapRows(event.newPlace(), event.oldPlace());
     }
 }
 

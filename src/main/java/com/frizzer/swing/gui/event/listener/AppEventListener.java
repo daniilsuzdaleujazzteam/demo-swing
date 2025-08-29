@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ItemEventListener {
+public class AppEventListener {
 
     private final List<EventHandler> listeners;
 

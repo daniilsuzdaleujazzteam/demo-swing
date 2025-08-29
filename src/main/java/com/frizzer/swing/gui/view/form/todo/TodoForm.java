@@ -16,6 +16,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
+
 @Component
 @Getter
 @RequiredArgsConstructor
@@ -143,14 +145,14 @@ public class TodoForm extends CrudComponent {
     private void moveUp(ActionEvent e) {
         int selectedRow = mainTable.getSelectedRow();
         if (selectedRow < mainTable.getRowCount() - 1) {
-            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow + 1));
+            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow + 1, INSTANCE_ID));
         }
     }
 
     private void moveDown(ActionEvent e) {
         int selectedRow = mainTable.getSelectedRow();
         if (selectedRow > 0) {
-            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow - 1));
+            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow - 1, INSTANCE_ID));
         }
     }
 
