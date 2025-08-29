@@ -7,12 +7,14 @@ import com.frizzer.swing.gui.view.CrudComponent;
 import com.frizzer.swing.gui.view.form.priority.PriorityForm;
 import com.frizzer.swing.logic.repository.TodoRepository;
 import com.frizzer.swing.logic.tasks.todo.DeleteTodoTask;
+import com.frizzer.swing.logic.tasks.todo.UpsertTodoTask;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
@@ -29,6 +31,7 @@ public class TodoForm extends CrudComponent {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TodoRepository todoRepository;
 
+    private JScrollPane mainPane;
     private JTable mainTable;
     private JButton listPriorityButton;
     private JButton moveUpButton;
@@ -38,6 +41,8 @@ public class TodoForm extends CrudComponent {
     protected void initComponents() {
         setName("Demo Swing App");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        mainPane = createScrollPane();
+        todoModel.addTableModelListener(this::updateTableFromCell);
     }
 
     @Override
@@ -60,7 +65,7 @@ public class TodoForm extends CrudComponent {
 
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.add(buttonPanel);
-        mainPanel.add(createTable());
+        mainPanel.add(mainPane);
 
         add(mainPanel);
         pack();
@@ -117,16 +122,20 @@ public class TodoForm extends CrudComponent {
         return moveDownButton;
     }
 
-    private JScrollPane createTable() {
+    private JScrollPane createScrollPane() {
+        mainPane = new JScrollPane(createTable());
+        mainPane.setMaximumSize(new Dimension(500, 400));
+        return mainPane;
+    }
+
+    private JTable createTable() {
         mainTable = new JTable(todoModel);
         mainTable.setBorder(BorderFactory.createEmptyBorder());
-        JScrollPane scrollPane = new JScrollPane(mainTable);
-        scrollPane.setMaximumSize(new Dimension(500, 400));
-        return scrollPane;
+        return mainTable;
     }
 
     private void openEditTodo(ActionEvent e) {
-        int selectedRowIndex = getMainTable().getSelectedRow();
+        int selectedRowIndex = mainTable.getSelectedRow();
         if (selectedRowIndex != -1) {
             Todo selectedTodo = todoModel.getTodoAt(selectedRowIndex);
             upsertTodoForm.setSelectedTodo(selectedTodo);
@@ -145,14 +154,26 @@ public class TodoForm extends CrudComponent {
     private void moveUp(ActionEvent e) {
         int selectedRow = mainTable.getSelectedRow();
         if (selectedRow < mainTable.getRowCount() - 1) {
-            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow + 1, INSTANCE_ID));
+            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow,
+                    selectedRow + 1,
+                    INSTANCE_ID));
         }
     }
 
     private void moveDown(ActionEvent e) {
         int selectedRow = mainTable.getSelectedRow();
         if (selectedRow > 0) {
-            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow - 1, INSTANCE_ID));
+            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow,
+                    selectedRow - 1,
+                    INSTANCE_ID));
+        }
+    }
+
+    private void updateTableFromCell(TableModelEvent e) {
+        if (!todoModel.isInternalUpdate() && e.getType() == TableModelEvent.UPDATE) {
+            int row = e.getFirstRow();
+            Todo updatedTodo = todoModel.getTodoAt(row);
+            new UpsertTodoTask(todoRepository, updatedTodo, applicationEventPublisher).execute();
         }
     }
 

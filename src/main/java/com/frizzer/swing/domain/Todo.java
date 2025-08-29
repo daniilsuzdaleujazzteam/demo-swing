@@ -12,6 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.With;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
@@ -22,6 +25,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@With
+@Setter
 public class Todo implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,8 +38,8 @@ public class Todo implements Serializable {
     @Column(nullable = false)
     private LocalDate date;
     @ManyToOne
-    @JoinColumn(name = "priority_id", nullable = false)
-    @Setter
+    @JoinColumn(name = "priority_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Priority priority;
 
     @Override

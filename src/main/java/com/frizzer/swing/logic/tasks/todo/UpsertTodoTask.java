@@ -51,7 +51,10 @@ public class UpsertTodoTask extends BaseTask<Todo, Object[]> {
     @Override
     protected void done() {
         Todo saved = get();
-        eventPublisher.publishEvent(new EntityChangedEvent<>(List.of(saved), getTaskType(), getChangeType(), INSTANCE_ID));
+        eventPublisher.publishEvent(new EntityChangedEvent<>(List.of(saved),
+                getTaskType(),
+                getChangeType(),
+                INSTANCE_ID));
         log.info("Finished saving task with description {}", todo.getDescription());
     }
 }

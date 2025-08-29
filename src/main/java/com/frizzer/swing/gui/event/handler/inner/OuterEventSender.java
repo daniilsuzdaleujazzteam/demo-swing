@@ -1,33 +1,32 @@
-package com.frizzer.swing.gui.event.sender;
+package com.frizzer.swing.gui.event.handler.inner;
 
 import com.frizzer.swing.gui.event.event.Event;
 import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
 import static com.frizzer.swing.gui.event.event.DataChangeType.LOAD;
 
-@Service
 @RequiredArgsConstructor
+@Component
 @Slf4j
-public class EventSender {
+public class OuterEventSender extends InnerEventHandler {
 
     private final JmsTemplate jmsTemplate;
 
-    @EventListener(Event.class)
-    public void sendEvent(Event event) {
-        if (filter(event)) {
+    @Override
+    public void handle(Event event) {
+        if (excludeFilter(event)) {
+            log.debug("Skipping event {}", event);
             return;
         }
-        log.info("Sending event: {}", event);
         jmsTemplate.convertAndSend("eventTopic", event);
     }
 
-    private boolean filter(Event event) {
+    private boolean excludeFilter(Event event) {
         return notFromThisInstance(event) || isLoadTask(event);
     }
 
@@ -38,5 +37,4 @@ public class EventSender {
     private boolean isLoadTask(Event event) {
         return event instanceof EntityChangedEvent<?> entityChangedEvent && entityChangedEvent.dataChangeType() == LOAD;
     }
-
 }

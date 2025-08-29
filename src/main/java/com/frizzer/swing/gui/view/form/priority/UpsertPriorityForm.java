@@ -1,7 +1,6 @@
 package com.frizzer.swing.gui.view.form.priority;
 
 import com.frizzer.swing.domain.Priority;
-import com.frizzer.swing.gui.event.sender.EventSender;
 import com.frizzer.swing.gui.model.priority.PriorityModel;
 import com.frizzer.swing.gui.view.UpsertComponent;
 import com.frizzer.swing.logic.repository.PriorityRepository;
@@ -20,7 +19,6 @@ import java.awt.event.ActionEvent;
 public class UpsertPriorityForm extends UpsertComponent {
 
     private final PriorityRepository priorityRepository;
-    private final EventSender eventSender;
     private final PriorityModel priorityModel;
     private final ApplicationEventPublisher applicationEventPublisher;
 

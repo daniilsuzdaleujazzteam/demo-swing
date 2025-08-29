@@ -1,7 +1,6 @@
 package com.frizzer.swing.gui.view.form.priority;
 
 import com.frizzer.swing.domain.Priority;
-import com.frizzer.swing.gui.event.sender.EventSender;
 import com.frizzer.swing.gui.model.priority.PriorityModel;
 import com.frizzer.swing.gui.view.CrudComponent;
 import com.frizzer.swing.logic.repository.PriorityRepository;
@@ -23,7 +22,6 @@ public class PriorityForm extends CrudComponent {
     private final UpsertPriorityForm upsertPriorityForm;
     private final PriorityModel priorityModel;
     private final PriorityRepository priorityRepository;
-    private final EventSender eventSender;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private JList<Priority> priorityList;

@@ -43,7 +43,10 @@ public class LoadPriorityTask extends BaseTask<List<Priority>, Object[]> {
     @Override
     @SneakyThrows
     public void done() {
-        eventPublisher.publishEvent(new EntityChangedEvent<>(get(), getTaskType(), getChangeType(), INSTANCE_ID));
+        eventPublisher.publishEvent(new EntityChangedEvent<>(get(),
+                getTaskType(),
+                getChangeType(),
+                INSTANCE_ID));
         log.info("Finished loading priorities");
     }
 }
