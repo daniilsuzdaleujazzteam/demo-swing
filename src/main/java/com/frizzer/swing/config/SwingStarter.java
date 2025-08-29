@@ -8,20 +8,20 @@ import org.springframework.stereotype.Component;
 
 import java.awt.*;
 
+import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
+
 @Component
 @Slf4j
 class SwingStarter implements ApplicationRunner {
     private final TodoController controller;
-    private final UUIDProvider idProvider;
 
-    public SwingStarter(TodoController controller, UUIDProvider idProvider) {
+    public SwingStarter(TodoController controller) {
         this.controller = controller;
-        this.idProvider = idProvider;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("Starting application with instance id {}", idProvider.getId());
+        log.info("Starting application with instance id {}", INSTANCE_ID);
         EventQueue.invokeLater(controller::show);
     }
 }

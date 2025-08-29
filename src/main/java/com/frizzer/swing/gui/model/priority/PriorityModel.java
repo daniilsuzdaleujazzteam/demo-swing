@@ -1,7 +1,9 @@
 package com.frizzer.swing.gui.model.priority;
 
 import com.frizzer.swing.domain.Priority;
+import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
 import lombok.Getter;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -11,7 +13,7 @@ import java.util.Objects;
 
 @Component
 @Getter
-public class PriorityModel extends DefaultListModel<Priority> {
+public class PriorityModel extends AbstractListModel<Priority> {
 
     private final List<Priority> data = new ArrayList<>();
 
@@ -51,5 +53,17 @@ public class PriorityModel extends DefaultListModel<Priority> {
     public void remove(Priority priority) {
         data.remove(priority);
         fireContentsChanged(this, data.size() - 1, data.size() - 1);
+    }
+
+    @EventListener(EntityChangedEvent.class)
+    private void onPriorityChanged(EntityChangedEvent<?> event) {
+        if (event.entityClass() == Priority.class) {
+            List<Priority> priorities = (List<Priority>) event.entity();
+            switch (event.dataChangeType()) {
+                case DELETE -> remove(priorities.getFirst());
+                case UPSERT -> upsert(priorities.getFirst());
+                case LOAD -> addAll(priorities);
+            }
+        }
     }
 }

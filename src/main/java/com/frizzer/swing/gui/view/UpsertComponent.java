@@ -19,5 +19,6 @@ public abstract class UpsertComponent extends FrameComponent {
     protected void initButtons() {
         this.saveButton = createSaveButton();
         this.cancelButton = createCancelButton();
+        cancelButton.addActionListener(e -> dispose());
     }
 }

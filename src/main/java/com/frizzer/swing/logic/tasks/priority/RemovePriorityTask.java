@@ -1,23 +1,41 @@
 package com.frizzer.swing.logic.tasks.priority;
 
 import com.frizzer.swing.domain.Priority;
-import com.frizzer.swing.gui.model.priority.PriorityModel;
-import com.frizzer.swing.gui.event.DataChangeType;
+import com.frizzer.swing.gui.event.event.DataChangeType;
+import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
 import com.frizzer.swing.logic.repository.PriorityRepository;
 import com.frizzer.swing.logic.tasks.BaseTask;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.function.Consumer;
+import java.util.List;
 
-@RequiredArgsConstructor
+import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
+
 @Slf4j
 public class RemovePriorityTask extends BaseTask<Priority, Object[]> {
 
     private final PriorityRepository repository;
     private final Priority priority;
-    private final Consumer<Priority> consumer;
+
+    public RemovePriorityTask(PriorityRepository repository,
+                              Priority priority,
+                              ApplicationEventPublisher applicationEventPublisher) {
+        super(applicationEventPublisher);
+        this.repository = repository;
+        this.priority = priority;
+    }
+
+    @Override
+    public DataChangeType getChangeType() {
+        return DataChangeType.DELETE;
+    }
+
+    @Override
+    public Class<Priority> getTaskType() {
+        return Priority.class;
+    }
 
     @Override
     protected Priority doInBackground() {
@@ -30,12 +48,10 @@ public class RemovePriorityTask extends BaseTask<Priority, Object[]> {
     @Override
     @SneakyThrows
     public void done() {
-        consumer.accept(priority);
+        eventPublisher.publishEvent(new EntityChangedEvent<>(List.of(get()),
+                getTaskType(),
+                getChangeType(),
+                INSTANCE_ID));
         log.info("Finished delete task with name {}", priority.getName());
-    }
-
-    @Override
-    public DataChangeType getType() {
-        return DataChangeType.DELETE;
     }
 }

@@ -1,11 +1,15 @@
 package com.frizzer.swing.gui.view.form.todo;
 
 import com.frizzer.swing.domain.Todo;
+import com.frizzer.swing.gui.event.event.impl.PlacementSwapEvent;
 import com.frizzer.swing.gui.model.todo.TodoModel;
 import com.frizzer.swing.gui.view.CrudComponent;
 import com.frizzer.swing.gui.view.form.priority.PriorityForm;
+import com.frizzer.swing.logic.repository.TodoRepository;
+import com.frizzer.swing.logic.tasks.todo.DeleteTodoTask;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -20,6 +24,8 @@ public class TodoForm extends CrudComponent {
     private final UpsertTodoForm upsertTodoForm;
     private final TodoModel todoModel;
     private final PriorityForm priorityForm;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final TodoRepository todoRepository;
 
     private JTable mainTable;
     private JButton listPriorityButton;
@@ -42,18 +48,17 @@ public class TodoForm extends CrudComponent {
 
     @Override
     protected void placeComponents() {
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.add(createTable());
-
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(createButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
-        buttonPanel.add(moveDownButton);
         buttonPanel.add(moveUpButton);
+        buttonPanel.add(moveDownButton);
         buttonPanel.add(listPriorityButton);
 
-        mainPanel.add(buttonPanel, 0);
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.add(buttonPanel);
+        mainPanel.add(createTable());
 
         add(mainPanel);
         pack();
@@ -88,6 +93,7 @@ public class TodoForm extends CrudComponent {
     @Override
     protected JButton createDeleteButton() {
         deleteButton = new JButton("Delete");
+        deleteButton.addActionListener(this::deleteTodo);
         return deleteButton;
     }
 
@@ -98,11 +104,15 @@ public class TodoForm extends CrudComponent {
     }
 
     private JButton createMoveUpButton() {
-        return new JButton("↑");
+        moveUpButton = new JButton("↓");
+        moveUpButton.addActionListener(this::moveUp);
+        return moveUpButton;
     }
 
     private JButton createMoveDownButton() {
-        return new JButton("↓");
+        moveDownButton = new JButton("↑");
+        moveDownButton.addActionListener(this::moveDown);
+        return moveDownButton;
     }
 
     private JScrollPane createTable() {
@@ -119,6 +129,28 @@ public class TodoForm extends CrudComponent {
             Todo selectedTodo = todoModel.getTodoAt(selectedRowIndex);
             upsertTodoForm.setSelectedTodo(selectedTodo);
             upsertTodoForm.setVisible(true);
+        }
+    }
+
+    private void deleteTodo(ActionEvent e) {
+        int selectedRow = mainTable.getSelectedRow();
+        if (selectedRow != -1) {
+            Todo selectedTodo = todoModel.getTodoAt(selectedRow);
+            new DeleteTodoTask(todoRepository, selectedTodo, applicationEventPublisher).execute();
+        }
+    }
+
+    private void moveUp(ActionEvent e) {
+        int selectedRow = mainTable.getSelectedRow();
+        if (selectedRow < mainTable.getRowCount() - 1) {
+            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow + 1));
+        }
+    }
+
+    private void moveDown(ActionEvent e) {
+        int selectedRow = mainTable.getSelectedRow();
+        if (selectedRow > 0) {
+            applicationEventPublisher.publishEvent(new PlacementSwapEvent(selectedRow, selectedRow - 1));
         }
     }
 

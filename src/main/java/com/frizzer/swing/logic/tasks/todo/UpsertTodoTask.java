@@ -5,6 +5,7 @@ import com.frizzer.swing.gui.event.event.DataChangeType;
 import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
 import com.frizzer.swing.logic.repository.TodoRepository;
 import com.frizzer.swing.logic.tasks.BaseTask;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -14,18 +15,23 @@ import java.util.List;
 import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
 
 @Slf4j
-public class LoadTodoTask extends BaseTask<List<Todo>, Object[]> {
+@Getter
+public class UpsertTodoTask extends BaseTask<Todo, Object[]> {
 
     private final TodoRepository todoRepository;
+    private final Todo todo;
 
-    public LoadTodoTask(TodoRepository todoRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public UpsertTodoTask(TodoRepository todoRepository,
+                          Todo todo,
+                          ApplicationEventPublisher applicationEventPublisher) {
         super(applicationEventPublisher);
         this.todoRepository = todoRepository;
+        this.todo = todo;
     }
 
     @Override
     public DataChangeType getChangeType() {
-        return DataChangeType.LOAD;
+        return DataChangeType.UPSERT;
     }
 
     @Override
@@ -34,15 +40,18 @@ public class LoadTodoTask extends BaseTask<List<Todo>, Object[]> {
     }
 
     @Override
-    protected List<Todo> doInBackground() {
-        log.info("Started loading tasks");
-        return todoRepository.findAll();
+    protected Todo doInBackground() {
+        log.info("Started saving task with description {}", todo.getDescription());
+        Todo saved = todoRepository.save(todo);
+        idList.add(saved.getId());
+        return saved;
     }
 
     @SneakyThrows
     @Override
     protected void done() {
-        eventPublisher.publishEvent(new EntityChangedEvent<>(get(), getTaskType(), getChangeType(), INSTANCE_ID));
-        log.info("Finished loading tasks");
+        Todo saved = get();
+        eventPublisher.publishEvent(new EntityChangedEvent<>(List.of(saved), getTaskType(), getChangeType(), INSTANCE_ID));
+        log.info("Finished saving task with description {}", todo.getDescription());
     }
 }

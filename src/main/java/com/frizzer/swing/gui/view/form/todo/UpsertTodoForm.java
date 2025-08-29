@@ -2,14 +2,19 @@ package com.frizzer.swing.gui.view.form.todo;
 
 import com.frizzer.swing.domain.Priority;
 import com.frizzer.swing.domain.Todo;
+import com.frizzer.swing.gui.model.priority.PriorityComboBoxModel;
 import com.frizzer.swing.gui.model.priority.PriorityModel;
 import com.frizzer.swing.gui.view.UpsertComponent;
+import com.frizzer.swing.logic.repository.TodoRepository;
+import com.frizzer.swing.logic.tasks.todo.UpsertTodoTask;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 
 @Component
@@ -18,13 +23,15 @@ import java.time.LocalDate;
 public class UpsertTodoForm extends UpsertComponent {
 
     private final PriorityModel priorityModel;
+    private final TodoRepository todoRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    private JTextField nameField;
+    private JTextField titleField;
     private JTextField descriptionField;
     private JTextField dateField;
     private JComboBox<Priority> priorityComboBox;
 
-    private JPanel nameFieldPanel;
+    private JPanel titleFieldPanel;
     private JPanel descriptionFieldPanel;
     private JPanel dateFieldPanel;
     private JPanel priorityFieldPanel;
@@ -36,7 +43,7 @@ public class UpsertTodoForm extends UpsertComponent {
             throw new IllegalStateException("Todo is not selected");
         }
         this.selectedTodo = todo;
-        nameField.setText(todo.getTitle());
+        titleField.setText(todo.getTitle());
         descriptionField.setText(todo.getDescription());
         dateField.setText(todo.getDate().toString());
         priorityComboBox.setSelectedItem(todo.getPriority());
@@ -47,7 +54,7 @@ public class UpsertTodoForm extends UpsertComponent {
         setTitle("Task creator");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        nameFieldPanel = createNameFieldPanel();
+        titleFieldPanel = createNameFieldPanel();
         descriptionFieldPanel = createDescriptionFieldPanel();
         dateFieldPanel = createDateFieldPanel();
         priorityFieldPanel = createPriorityComboBoxPanel();
@@ -56,15 +63,18 @@ public class UpsertTodoForm extends UpsertComponent {
     @Override
     protected void initButtons() {
         super.initButtons();
-        cancelButton.addActionListener(e -> dispose());
+        saveButton.addActionListener(this::upsertTodo);
     }
 
     @Override
     protected void placeComponents() {
+        priorityComboBox.setPreferredSize(new Dimension(150, 20));
 
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
 
-        mainPanel.add(nameFieldPanel);
+        mainPanel.add(titleFieldPanel);
         mainPanel.add(descriptionFieldPanel);
         mainPanel.add(dateFieldPanel);
         mainPanel.add(priorityFieldPanel);
@@ -101,10 +111,10 @@ public class UpsertTodoForm extends UpsertComponent {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
 
         JLabel label = new JLabel("Task name:");
-        nameField = new JTextField(20);
+        titleField = new JTextField(20);
 
         panel.add(label);
-        panel.add(nameField);
+        panel.add(titleField);
 
         return panel;
     }
@@ -138,11 +148,24 @@ public class UpsertTodoForm extends UpsertComponent {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
 
         JLabel label = new JLabel("Priority:");
-        priorityComboBox = new JComboBox<>(priorityModel.getData().toArray(new Priority[0]));
+        priorityComboBox = new JComboBox<>(new PriorityComboBoxModel(priorityModel));
         panel.add(label);
         panel.add(priorityComboBox);
 
         return panel;
+    }
+
+    private void upsertTodo(ActionEvent e) {
+        new UpsertTodoTask(todoRepository, buildTodo(), applicationEventPublisher).execute();
+        dispose();
+    }
+
+    private Todo buildTodo() {
+        return new Todo(selectedTodo == null ? null : selectedTodo.getId(),
+                titleField.getText(),
+                descriptionField.getText(),
+                LocalDate.parse(dateField.getText()),
+                (Priority) priorityComboBox.getSelectedItem());
     }
 
 }

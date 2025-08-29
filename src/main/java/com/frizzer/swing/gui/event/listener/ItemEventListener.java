@@ -1,6 +1,6 @@
 package com.frizzer.swing.gui.event.listener;
 
-import com.frizzer.swing.gui.event.Event;
+import com.frizzer.swing.gui.event.event.Event;
 import com.frizzer.swing.gui.event.handler.EventHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +14,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemEventListener {
 
-    private final List<EventHandler<? extends Event>> listeners;
+    private final List<EventHandler> listeners;
 
     @JmsListener(destination = "eventTopic")
     public void listen(Event event) {
-        var handler = listeners.stream()
-                               .filter(e -> e.getEventClass().isAssignableFrom(event.getClass()))
-                               .findFirst()
-                               .orElseThrow(() -> new IllegalStateException("Handler for class " + event.getClass() + " not found"));
-        handler.handle(event);
+        listeners.forEach(handler -> handler.handle(event));
     }
 }

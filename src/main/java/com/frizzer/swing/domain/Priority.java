@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.With;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
@@ -18,7 +19,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @With
-public class Priority {
+public class Priority implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

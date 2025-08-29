@@ -1,10 +1,10 @@
-package com.frizzer.swing.gui.event;
+package com.frizzer.swing.gui.event.event;
 
 import lombok.Getter;
 
 @Getter
 public enum DataChangeType {
-    INSERT(1), UPDATE(0), DELETE(-1), LOAD(0);
+    UPSERT(1), LOAD(0), DELETE(-1);
 
     final int value;
 

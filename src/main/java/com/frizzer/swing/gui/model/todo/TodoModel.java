@@ -1,13 +1,19 @@
 package com.frizzer.swing.gui.model.todo;
 
+import com.frizzer.swing.domain.Priority;
 import com.frizzer.swing.domain.Todo;
+import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
+import com.frizzer.swing.gui.event.event.impl.PlacementSwapEvent;
 import lombok.Getter;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import javax.swing.event.TableModelEvent;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Component
@@ -51,10 +57,87 @@ public class TodoModel extends AbstractTableModel {
     }
 
     public void addAll(List<Todo> todoList) {
-        int before = data.size();
-        data.addAll(todoList);
-        int after = data.size();
-        fireTableChanged(new TableModelEvent(this, before, after - 1));
+        SwingUtilities.invokeLater(() -> {
+            int before = data.size();
+            data.addAll(todoList);
+            int after = data.size() - 1;
+            fireTableRowsInserted(before, after);
+        });
+    }
+
+    public void upsert(Todo todo) {
+        SwingUtilities.invokeLater(() -> {
+            data.stream()
+                .filter(it -> Objects.equals(it.getId(), todo.getId()))
+                .findFirst()
+                .ifPresentOrElse(existing -> {
+                    int index = data.indexOf(existing);
+                    data.set(index, todo);
+                    fireTableRowsUpdated(index, index);
+                }, () -> {
+                    data.add(todo);
+                    fireTableRowsInserted(data.size() - 1, data.size() - 1);
+                });
+        });
+    }
+
+    public void upsertPriority(Priority priority) {
+        SwingUtilities.invokeLater(() -> {
+            data.stream().filter(todo -> Objects.equals(todo.getPriority().getId(), priority.getId())).forEach(todo -> {
+                todo.setPriority(priority);
+                int index = data.indexOf(todo);
+                fireTableRowsUpdated(index, index);
+            });
+        });
+    }
+
+    public void remove(Todo todo) {
+        SwingUtilities.invokeLater(() -> {
+            int index = data.indexOf(todo);
+            data.remove(index);
+            fireTableRowsDeleted(index, index);
+        });
+    }
+
+    public void removeByPriority(Priority priority) {
+        for (int i = data.size() - 1; i >= 0; i--) {
+            if (Objects.equals(data.get(i).getPriority().getId(), priority.getId())) {
+                data.remove(i);
+                fireTableRowsDeleted(i, i);
+            }
+        }
+    }
+
+    public void swapRows(int index1, int index2) {
+        SwingUtilities.invokeLater(() -> {
+            Collections.swap(data, index1, index2);
+            fireTableRowsUpdated(index1, index1);
+            fireTableRowsUpdated(index2, index2);
+        });
+    }
+
+    @EventListener(EntityChangedEvent.class)
+    private void onTodoChanged(EntityChangedEvent<?> event) {
+        if (event.entityClass() == Priority.class) {
+            Priority priority = ((List<Priority>) event.entity()).getFirst();
+            switch (event.dataChangeType()) {
+                case UPSERT -> upsertPriority(priority);
+                case DELETE -> removeByPriority(priority);
+            }
+        }
+        if (event.entityClass() == Todo.class) {
+            List<Todo> todos = (List<Todo>) event.entity();
+            switch (event.dataChangeType()) {
+                case LOAD -> addAll(todos);
+                case UPSERT -> upsert(todos.getFirst());
+                case DELETE -> remove(todos.getFirst());
+            }
+        }
+    }
+
+    @EventListener(PlacementSwapEvent.class)
+    private void onPlacementSwap(PlacementSwapEvent event) {
+        swapRows(event.newPlace(), event.oldPlace());
     }
 }
 

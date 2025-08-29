@@ -8,6 +8,7 @@ import com.frizzer.swing.logic.repository.PriorityRepository;
 import com.frizzer.swing.logic.tasks.priority.UpsertPriorityTask;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -21,6 +22,7 @@ public class UpsertPriorityForm extends UpsertComponent {
     private final PriorityRepository priorityRepository;
     private final EventSender eventSender;
     private final PriorityModel priorityModel;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private JTextField nameField;
     private JTextField weightField;
@@ -112,9 +114,7 @@ public class UpsertPriorityForm extends UpsertComponent {
     }
 
     private void upsertPriority(ActionEvent e) {
-        new UpsertPriorityTask(priorityRepository,
-                buildPriority(),
-                priority -> SwingUtilities.invokeLater(() -> priorityModel.upsert(priority))).execute();
+        new UpsertPriorityTask(priorityRepository, buildPriority(), applicationEventPublisher).execute();
         dispose();
     }
 

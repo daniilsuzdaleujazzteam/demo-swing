@@ -8,6 +8,7 @@ import com.frizzer.swing.logic.repository.PriorityRepository;
 import com.frizzer.swing.logic.tasks.priority.RemovePriorityTask;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ public class PriorityForm extends CrudComponent {
     private final PriorityModel priorityModel;
     private final PriorityRepository priorityRepository;
     private final EventSender eventSender;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private JList<Priority> priorityList;
 
@@ -113,9 +115,7 @@ public class PriorityForm extends CrudComponent {
 
     private void deletePriority(ActionEvent e) {
         Priority priority = priorityList.getSelectedValue();
-        eventSender.executeAndSend(new RemovePriorityTask(priorityRepository,
-                priority,
-                priorities -> SwingUtilities.invokeLater(() -> priorityModel.remove(priorities))));
+        new RemovePriorityTask(priorityRepository, priority, applicationEventPublisher).execute();
 
     }
 

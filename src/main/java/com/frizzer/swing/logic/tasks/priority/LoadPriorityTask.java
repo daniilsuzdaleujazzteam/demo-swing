@@ -1,25 +1,41 @@
 package com.frizzer.swing.logic.tasks.priority;
 
 import com.frizzer.swing.domain.Priority;
-import com.frizzer.swing.gui.event.DataChangeType;
+import com.frizzer.swing.gui.event.event.DataChangeType;
+import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
 import com.frizzer.swing.logic.repository.PriorityRepository;
 import com.frizzer.swing.logic.tasks.BaseTask;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
-import java.util.function.Consumer;
 
-@RequiredArgsConstructor
+import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
+
 @Slf4j
 public class LoadPriorityTask extends BaseTask<List<Priority>, Object[]> {
 
     private final PriorityRepository priorityRepository;
-    private final Consumer<List<Priority>> priorityConsumer;
+
+    public LoadPriorityTask(PriorityRepository priorityRepository,
+                            ApplicationEventPublisher applicationEventPublisher) {
+        super(applicationEventPublisher);
+        this.priorityRepository = priorityRepository;
+    }
 
     @Override
-    protected List<Priority> doInBackground(){
+    public DataChangeType getChangeType() {
+        return DataChangeType.LOAD;
+    }
+
+    @Override
+    public Class<Priority> getTaskType() {
+        return Priority.class;
+    }
+
+    @Override
+    protected List<Priority> doInBackground() {
         log.info("Started loading priorities");
         return priorityRepository.findAll();
     }
@@ -27,12 +43,7 @@ public class LoadPriorityTask extends BaseTask<List<Priority>, Object[]> {
     @Override
     @SneakyThrows
     public void done() {
-        priorityConsumer.accept(get());
+        eventPublisher.publishEvent(new EntityChangedEvent<>(get(), getTaskType(), getChangeType(), INSTANCE_ID));
         log.info("Finished loading priorities");
-    }
-
-    @Override
-    public DataChangeType getType() {
-        return DataChangeType.LOAD;
     }
 }

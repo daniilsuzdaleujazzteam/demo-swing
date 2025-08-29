@@ -1,12 +1,15 @@
 package com.frizzer.swing.gui.event.sender;
 
-import com.frizzer.swing.config.UUIDProvider;
-import com.frizzer.swing.gui.event.Event;
-import com.frizzer.swing.logic.tasks.BaseTask;
+import com.frizzer.swing.gui.event.event.Event;
+import com.frizzer.swing.gui.event.event.impl.EntityChangedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
+
+import static com.frizzer.swing.config.IdGenerator.INSTANCE_ID;
+import static com.frizzer.swing.gui.event.event.DataChangeType.LOAD;
 
 @Service
 @RequiredArgsConstructor
@@ -14,21 +17,26 @@ import org.springframework.stereotype.Service;
 public class EventSender {
 
     private final JmsTemplate jmsTemplate;
-    private final UUIDProvider idProvider;
 
+    @EventListener(Event.class)
     public void sendEvent(Event event) {
+        if (filter(event)) {
+            return;
+        }
         log.info("Sending event: {}", event);
         jmsTemplate.convertAndSend("eventTopic", event);
     }
 
-    //TODO: Change logic to work with events separate from tasks
-    public void executeAndSend(BaseTask<?, ?> task) {
-        task.execute();
-        task.addPropertyChangeListener(change -> {
-//            if (change.getNewValue() == SwingWorker.StateValue.DONE) {
-//                sendEvent(task.createEvent(idProvider.getId()));
-//            }
-        });
+    private boolean filter(Event event) {
+        return notFromThisInstance(event) || isLoadTask(event);
+    }
+
+    private boolean notFromThisInstance(Event event) {
+        return !event.getInstanceId().equals(INSTANCE_ID);
+    }
+
+    private boolean isLoadTask(Event event) {
+        return event instanceof EntityChangedEvent<?> entityChangedEvent && entityChangedEvent.dataChangeType() == LOAD;
     }
 
 }

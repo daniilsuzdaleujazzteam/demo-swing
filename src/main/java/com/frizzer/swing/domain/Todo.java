@@ -11,8 +11,10 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -20,7 +22,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Todo {
+public class Todo implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,6 +34,7 @@ public class Todo {
     private LocalDate date;
     @ManyToOne
     @JoinColumn(name = "priority_id", nullable = false)
+    @Setter
     private Priority priority;
 
     @Override
