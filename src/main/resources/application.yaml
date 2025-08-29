@@ -1,0 +1,14 @@
+spring:
+  activemq:
+    user: admin
+    password: admin
+    broker-url: tcp://localhost:61616
+    packages:
+      trust-all: true
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=master;encrypt=true;trustServerCertificate=true
+    username: sa
+    password: YourStrong@Pass1
+  jpa:
+    generate-ddl: true
+    show-sql: true
